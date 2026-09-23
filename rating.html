@@ -34,7 +34,6 @@
 // ====== CẤU HÌNH - THAY BẰNG THÔNG TIN SUPABASE CỦA BẠN ======
 const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
-
 // ================================================================
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -63,12 +62,26 @@ async function init() {
 
   const { data: existingRating } = await supabase
     .from('Ticket_Rating')
-    .select('id')
+    .select('Stars, Comment, Created_at')
     .eq('Ticket_ID', ticketId)
     .maybeSingle();
 
   if (existingRating) {
-    contentEl.innerHTML = `<div class="msg success">✅ Sự vụ <b>${ticketId}</b> đã được đánh giá trước đó.<br/>Cảm ơn bạn đã phản hồi!</div>`;
+    const starsDisplay = '★'.repeat(existingRating.Stars) + '☆'.repeat(5 - existingRating.Stars);
+    contentEl.innerHTML = `
+      <div class="info">
+        <div><b>Mã sự vụ:</b> ${ticket.Ticket_ID}</div>
+        <div><b>Khách sạn:</b> ${ticket.Company || '-'}</div>
+        <div><b>Nội dung:</b> ${ticket.Request || '-'}</div>
+        <div><b>Kỹ thuật hỗ trợ:</b> ${ticket.Staff || '-'}</div>
+      </div>
+      <div class="msg success" style="padding:10px 0;">
+        <div style="font-size:32px;color:#f5a623;">${starsDisplay}</div>
+        <div style="margin-top:8px;">Đã đánh giá: <b>${existingRating.Stars}/5 sao</b></div>
+        ${existingRating.Comment ? `<div style="margin-top:8px;color:#555;font-style:italic;">"${existingRating.Comment}"</div>` : ''}
+        <div style="margin-top:10px;font-size:12px;color:#999;">Cảm ơn bạn đã phản hồi!</div>
+      </div>
+    `;
     return;
   }
 

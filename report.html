@@ -38,7 +38,7 @@
 
   <table>
     <thead>
-      <tr><th>Ticket</th><th>Khách sạn</th><th>Nội dung</th><th>Kỹ thuật</th><th>Trạng thái</th></tr>
+      <tr><th>Ticket</th><th>Khách sạn</th><th>Nội dung</th><th>Kỹ thuật</th><th>Trạng thái</th><th>Đánh giá</th></tr>
     </thead>
     <tbody id="rows"><tr><td colspan="5">Đang tải...</td></tr></tbody>
   </table>
@@ -60,6 +60,13 @@ function statusBadge(status) {
   };
   const [cls, label] = map[status] || ['b-open', status];
   return `<span class="badge ${cls}">${label}</span>`;
+}
+
+function ratingCell(t) {
+  if (t.Rating_Stars) {
+    return `<span style="color:#f5a623;">${'★'.repeat(t.Rating_Stars)}${'☆'.repeat(5 - t.Rating_Stars)}</span>`;
+  }
+  return `<span style="color:#999;font-size:12px;">Khách hàng chưa đánh giá</span>`;
 }
 
 async function init() {
@@ -84,7 +91,7 @@ async function init() {
 
   const rowsEl = document.getElementById('rows');
   if (error || !tickets || tickets.length === 0) {
-    rowsEl.innerHTML = '<tr><td colspan="5">Chưa có dữ liệu.</td></tr>';
+    rowsEl.innerHTML = '<tr><td colspan="6">Chưa có dữ liệu.</td></tr>';
     return;
   }
 
@@ -95,6 +102,7 @@ async function init() {
       <td>${(t.Request || '-').slice(0, 40)}</td>
       <td>${t.Staff || '-'}</td>
       <td>${statusBadge(t.Status)}</td>
+      <td>${ratingCell(t)}</td>
     </tr>
   `).join('');
 }
