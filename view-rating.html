@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HKT Solutions - Xem đánh giá dịch vụ</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { font-family:'Segoe UI', Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+  .card { max-width:480px; margin:30px auto; background:#fff; border-radius:14px; box-shadow:0 4px 20px rgba(0,0,0,.08); padding:28px; }
+  h1 { font-size:20px; color:#1a2b4c; margin-bottom:4px; }
+  .sub { color:#888; font-size:13px; margin-bottom:20px; }
+  .info { background:#f8f9fb; border-radius:10px; padding:14px 16px; margin-bottom:22px; font-size:14px; line-height:1.6; }
+  .info b { color:#1a2b4c; }
+  .msg { text-align:center; padding:20px 10px; }
+  .msg.success { color:#1a7f37; }
+  .msg.error { color:#c62828; }
+  .msg.pending { color:#999; }
+  .stars-big { font-size:34px; color:#f5a623; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>HKT Solutions</h1>
+  <div class="sub">Trung tâm đánh giá dịch vụ</div>
+  <div id="content">Đang tải thông tin sự vụ...</div>
+</div>
+
+<script>
+// ====== CẤU HÌNH - THAY BẰNG THÔNG TIN SUPABASE CỦA BẠN ======
+const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
+// ================================================================
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const params = new URLSearchParams(window.location.search);
+const ticketId = params.get('ticket_id');
+const contentEl = document.getElementById('content');
+
+async function init() {
+  try {
+    if (!ticketId) {
+      contentEl.innerHTML = `<div class="msg error">Thiếu mã ticket_id trên đường dẫn.</div>`;
+      return;
+    }
+
+    const { data: ticket, error } = await supabaseClient
+      .from('v_ticket_public')
+      .select('*')
+      .eq('Ticket_ID', ticketId)
+      .single();
+
+    if (error || !ticket) {
+      contentEl.innerHTML = `<div class="msg error">Không tìm thấy sự vụ với mã <b>${ticketId}</b>.</div>`;
+      return;
+    }
+
+    const infoHtml = `
+      <div class="info">
+        <div><b>Mã sự vụ:</b> ${ticket.Ticket_ID}</div>
+        <div><b>Khách sạn:</b> ${ticket.Company || '-'}</div>
+        <div><b>Nội dung:</b> ${ticket.Request || '-'}</div>
+        <div><b>Kỹ thuật hỗ trợ:</b> ${ticket.Staff || '-'}</div>
+      </div>
+    `;
+
+    if (ticket.Rating_Stars) {
+      const starsDisplay = '★'.repeat(ticket.Rating_Stars) + '☆'.repeat(5 - ticket.Rating_Stars);
+      contentEl.innerHTML = infoHtml + `
+        <div class="msg success">
+          <div class="stars-big">${starsDisplay}</div>
+          <div style="margin-top:8px;">Khách hàng đã đánh giá: <b>${ticket.Rating_Stars}/5 sao</b></div>
+          ${ticket.Rating_Comment ? `<div style="margin-top:8px;color:#555;font-style:italic;">"${ticket.Rating_Comment}"</div>` : ''}
+        </div>
+      `;
+    } else {
+      contentEl.innerHTML = infoHtml + `
+        <div class="msg pending">
+          <div style="font-size:34px;">—</div>
+          <div style="margin-top:8px;">Khách hàng chưa đánh giá</div>
+        </div>
+      `;
+    }
+  } catch (err) {
+    contentEl.innerHTML = `<div class="msg error">Có lỗi xảy ra: ${err.message}</div>`;
+    console.error(err);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
