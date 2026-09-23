@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HKT Solutions - Báo cáo Helpdesk hôm nay</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { font-family:'Segoe UI', Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+  .wrap { max-width:900px; margin:0 auto; }
+  h1 { color:#1a2b4c; font-size:22px; margin-bottom:2px; }
+  .sub { color:#888; font-size:13px; margin-bottom:24px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:28px; }
+  .stat { background:#fff; border-radius:12px; padding:20px; box-shadow:0 2px 10px rgba(0,0,0,.06); text-align:center; }
+  .stat .num { font-size:32px; font-weight:700; color:#1a73e8; }
+  .stat .label { color:#666; font-size:13px; margin-top:6px; }
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+  th, td { padding:10px 14px; text-align:left; font-size:13px; border-bottom:1px solid #f0f0f0; }
+  th { background:#1a2b4c; color:#fff; font-weight:500; }
+  .badge { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .b-open { background:#fff3cd; color:#856404; }
+  .b-progress { background:#cfe2ff; color:#0d47a1; }
+  .b-close { background:#d4edda; color:#1a7f37; }
+  .refresh { float:right; font-size:12px; color:#1a73e8; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Báo cáo Helpdesk hôm nay <span class="refresh" onclick="init()">↻ Làm mới</span></h1>
+  <div class="sub" id="today-label">Đang tải...</div>
+
+  <div class="grid" id="stats">
+    <div class="stat"><div class="num">-</div><div class="label">Ticket hôm nay</div></div>
+    <div class="stat"><div class="num">-</div><div class="label">Đã đóng hôm nay</div></div>
+    <div class="stat"><div class="num">-</div><div class="label">Đang mở (tất cả)</div></div>
+    <div class="stat"><div class="num">-</div><div class="label">TB giờ xử lý</div></div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Ticket</th><th>Khách sạn</th><th>Nội dung</th><th>Kỹ thuật</th><th>Trạng thái</th></tr>
+    </thead>
+    <tbody id="rows"><tr><td colspan="5">Đang tải...</td></tr></tbody>
+  </table>
+</div>
+
+<script>
+// ====== CẤU HÌNH - THAY BẰNG THÔNG TIN SUPABASE CỦA BẠN ======
+const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
+// ================================================================
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function statusBadge(status) {
+  const map = {
+    'Open': ['b-open', 'Mở sự vụ'], 'In_progress': ['b-progress', 'Đang xử lý'],
+    'Wait_Confirm': ['b-progress', 'Chờ xác nhận'], 'Pending': ['b-open', 'Tạm hoãn'],
+    'Fix': ['b-progress', 'Chỉnh sửa'], 'Close': ['b-close', 'Đóng'], 'Cancel': ['b-close', 'Hủy']
+  };
+  const [cls, label] = map[status] || ['b-open', status];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+async function init() {
+  document.getElementById('today-label').textContent =
+    'Cập nhật lúc ' + new Date().toLocaleString('vi-VN');
+
+  const { data: stats } = await supabase.from('v_report_today').select('*').single();
+
+  const statEls = document.querySelectorAll('.stat .num');
+  if (stats) {
+    statEls[0].textContent = stats.tickets_today ?? 0;
+    statEls[1].textContent = stats.closed_today ?? 0;
+    statEls[2].textContent = stats.open_now ?? 0;
+    statEls[3].textContent = (stats.avg_resolve_hours ?? '-') + (stats.avg_resolve_hours != null ? ' h' : '');
+  }
+
+  const { data: tickets, error } = await supabase
+    .from('v_ticket_public')
+    .select('*')
+    .order('Ticket_ID', { ascending: false })
+    .limit(20);
+
+  const rowsEl = document.getElementById('rows');
+  if (error || !tickets || tickets.length === 0) {
+    rowsEl.innerHTML = '<tr><td colspan="5">Chưa có dữ liệu.</td></tr>';
+    return;
+  }
+
+  rowsEl.innerHTML = tickets.map(t => `
+    <tr>
+      <td>${t.Ticket_ID}</td>
+      <td>${t.Company || '-'}</td>
+      <td>${(t.Request || '-').slice(0, 40)}</td>
+      <td>${t.Staff || '-'}</td>
+      <td>${statusBadge(t.Status)}</td>
+    </tr>
+  `).join('');
+}
+
+init();
+</script>
+</body>
+</html>

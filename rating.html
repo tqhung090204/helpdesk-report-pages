@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>HKT Solutions - Trung tâm đánh giá dịch vụ</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body { font-family: 'Segoe UI', Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
+  .card { max-width:480px; margin:30px auto; background:#fff; border-radius:14px; box-shadow:0 4px 20px rgba(0,0,0,.08); padding:28px; }
+  h1 { font-size:20px; color:#1a2b4c; margin-bottom:4px; }
+  .sub { color:#888; font-size:13px; margin-bottom:20px; }
+  .info { background:#f8f9fb; border-radius:10px; padding:14px 16px; margin-bottom:22px; font-size:14px; line-height:1.6; }
+  .info b { color:#1a2b4c; }
+  .stars { display:flex; gap:8px; justify-content:center; margin:18px 0; }
+  .stars span { font-size:38px; cursor:pointer; color:#ddd; transition:.15s; }
+  .stars span.active { color:#f5a623; }
+  textarea { width:100%; box-sizing:border-box; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:14px; min-height:80px; resize:vertical; }
+  button { width:100%; margin-top:16px; background:#1a73e8; color:#fff; border:none; padding:12px; border-radius:8px; font-size:15px; cursor:pointer; }
+  button:disabled { background:#aac6f4; cursor:not-allowed; }
+  .msg { text-align:center; padding:30px 10px; }
+  .msg.success { color:#1a7f37; }
+  .msg.error { color:#c62828; }
+</style>
+</head>
+<body>
+<div class="card" id="app">
+  <h1>HKT Solutions</h1>
+  <div class="sub">Trung tâm đánh giá dịch vụ</div>
+  <div id="content">Đang tải thông tin sự vụ...</div>
+</div>
+
+<script>
+// ====== CẤU HÌNH - THAY BẰNG THÔNG TIN SUPABASE CỦA BẠN ======
+const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
+
+// ================================================================
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const params = new URLSearchParams(window.location.search);
+const ticketId = params.get('ticket_id');
+const contentEl = document.getElementById('content');
+
+let selectedStars = 0;
+
+async function init() {
+  if (!ticketId) {
+    contentEl.innerHTML = `<div class="msg error">Thiếu mã ticket_id trên đường dẫn.</div>`;
+    return;
+  }
+
+  const { data: ticket, error } = await supabase
+    .from('v_ticket_public')
+    .select('*')
+    .eq('Ticket_ID', ticketId)
+    .single();
+
+  if (error || !ticket) {
+    contentEl.innerHTML = `<div class="msg error">Không tìm thấy sự vụ với mã <b>${ticketId}</b>.</div>`;
+    return;
+  }
+
+  const { data: existingRating } = await supabase
+    .from('Ticket_Rating')
+    .select('id')
+    .eq('Ticket_ID', ticketId)
+    .maybeSingle();
+
+  if (existingRating) {
+    contentEl.innerHTML = `<div class="msg success">✅ Sự vụ <b>${ticketId}</b> đã được đánh giá trước đó.<br/>Cảm ơn bạn đã phản hồi!</div>`;
+    return;
+  }
+
+  contentEl.innerHTML = `
+    <div class="info">
+      <div><b>Mã sự vụ:</b> ${ticket.Ticket_ID}</div>
+      <div><b>Khách sạn:</b> ${ticket.Company || '-'}</div>
+      <div><b>Nội dung:</b> ${ticket.Request || '-'}</div>
+      <div><b>Kỹ thuật hỗ trợ:</b> ${ticket.Staff || '-'}</div>
+    </div>
+    <div style="text-align:center;font-size:14px;color:#555;">Bạn đánh giá chất lượng hỗ trợ thế nào?</div>
+    <div class="stars" id="stars">
+      <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+    </div>
+    <textarea id="comment" placeholder="Góp ý thêm (không bắt buộc)..."></textarea>
+    <button id="submitBtn" disabled>Gửi đánh giá</button>
+  `;
+
+  const starsEl = document.getElementById('stars');
+  const submitBtn = document.getElementById('submitBtn');
+
+  starsEl.querySelectorAll('span').forEach(star => {
+    star.addEventListener('click', () => {
+      selectedStars = parseInt(star.dataset.v);
+      starsEl.querySelectorAll('span').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.v) <= selectedStars);
+      });
+      submitBtn.disabled = false;
+    });
+  });
+
+  submitBtn.addEventListener('click', async () => {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Đang gửi...';
+    const comment = document.getElementById('comment').value;
+
+    const { error: insertError } = await supabase.from('Ticket_Rating').insert({
+      Ticket_ID: ticketId,
+      Stars: selectedStars,
+      Comment: comment
+    });
+
+    if (insertError) {
+      contentEl.innerHTML = `<div class="msg error">Có lỗi khi gửi đánh giá: ${insertError.message}</div>`;
+    } else {
+      contentEl.innerHTML = `<div class="msg success">🌟 Cảm ơn bạn đã đánh giá ${selectedStars} sao!<br/>HKT Solutions sẽ tiếp tục cải thiện dịch vụ.</div>`;
+    }
+  });
+}
+
+init();
+</script>
+</body>
+</html>
