@@ -36,7 +36,8 @@ const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
 // ================================================================
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const params = new URLSearchParams(window.location.search);
 const ticketId = params.get('ticket_id');
 const contentEl = document.getElementById('content');
@@ -44,12 +45,21 @@ const contentEl = document.getElementById('content');
 let selectedStars = 0;
 
 async function init() {
-  if (!ticketId) {
-    contentEl.innerHTML = `<div class="msg error">Thiếu mã ticket_id trên đường dẫn.</div>`;
-    return;
+  try {
+    if (!ticketId) {
+      contentEl.innerHTML = `<div class="msg error">Thiếu mã ticket_id trên đường dẫn.</div>`;
+      return;
+    }
+    await loadAndRender();
+  } catch (err) {
+    contentEl.innerHTML = `<div class="msg error">Có lỗi xảy ra: ${err.message}</div>`;
+    console.error(err);
   }
+}
 
-  const { data: ticket, error } = await supabase
+async function loadAndRender() {
+
+  const { data: ticket, error } = await supabaseClient
     .from('v_ticket_public')
     .select('*')
     .eq('Ticket_ID', ticketId)
@@ -60,7 +70,7 @@ async function init() {
     return;
   }
 
-  const { data: existingRating } = await supabase
+  const { data: existingRating } = await supabaseClient
     .from('Ticket_Rating')
     .select('Stars, Comment, Created_at')
     .eq('Ticket_ID', ticketId)
@@ -118,7 +128,7 @@ async function init() {
     submitBtn.textContent = 'Đang gửi...';
     const comment = document.getElementById('comment').value;
 
-    const { error: insertError } = await supabase.from('Ticket_Rating').insert({
+    const { error: insertError } = await supabaseClient.from('Ticket_Rating').insert({
       Ticket_ID: ticketId,
       Stars: selectedStars,
       Comment: comment

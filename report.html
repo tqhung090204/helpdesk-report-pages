@@ -50,7 +50,7 @@ const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
 // ================================================================
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function statusBadge(status) {
   const map = {
@@ -73,7 +73,7 @@ async function init() {
   document.getElementById('today-label').textContent =
     'Cập nhật lúc ' + new Date().toLocaleString('vi-VN');
 
-  const { data: stats } = await supabase.from('v_report_today').select('*').single();
+  const { data: stats } = await supabaseClient.from('v_report_today').select('*').single();
 
   const statEls = document.querySelectorAll('.stat .num');
   if (stats) {
@@ -83,7 +83,7 @@ async function init() {
     statEls[3].textContent = (stats.avg_resolve_hours ?? '-') + (stats.avg_resolve_hours != null ? ' h' : '');
   }
 
-  const { data: tickets, error } = await supabase
+  const { data: tickets, error } = await supabaseClient
     .from('v_ticket_public')
     .select('*')
     .order('Ticket_ID', { ascending: false })
