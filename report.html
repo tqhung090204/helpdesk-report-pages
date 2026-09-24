@@ -1,495 +1,616 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HKT Solutions - Báo cáo Helpdesk hôm nay</title>
-  
-  <!-- Font Google Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HKT Solutions - Báo cáo Helpdesk hôm nay</title>
 
-  <style>
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --bg-body: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --star-active: #f59e0b;
-      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    }
+    <!-- Font Google Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background-color: var(--bg-body);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 32px 16px;
-    }
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    .wrap {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    /* Header Section */
-    .dashboard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-bottom: 28px;
-      background: var(--card-bg);
-      padding: 20px 24px;
-      border-radius: 16px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .header-title h1 {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-title h1 i {
-      color: var(--primary);
-    }
-
-    .header-title .sub {
-      color: var(--text-muted);
-      font-size: 13px;
-      margin-top: 4px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-refresh {
-      background: #eff6ff;
-      color: var(--primary);
-      border: 1px solid #bfdbfe;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-refresh:hover {
-      background: #dbeafe;
-      transform: translateY(-1px);
-    }
-
-    .btn-refresh i.spin {
-      animation: spin 0.8s linear infinite;
-    }
-
-    /* KPI Grid */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      transition: all 0.2s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .stat-icon.blue { background: #eff6ff; color: #2563eb; }
-    .stat-icon.green { background: #f0fdf4; color: #16a34a; }
-    .stat-icon.amber { background: #fffbeb; color: #d97706; }
-    .stat-icon.purple { background: #faf5ff; color: #9333ea; }
-
-    .stat-info .num {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text-main);
-      line-height: 1.2;
-    }
-
-    .stat-info .label {
-      color: var(--text-muted);
-      font-size: 13px;
-      font-weight: 500;
-      margin-top: 2px;
-    }
-
-    /* Table Container */
-    .table-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      border: 1px solid var(--border-color);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-    }
-
-    .table-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-main);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
-
-    th {
-      background: #f8fafc;
-      color: #475569;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 12px 20px;
-      border-bottom: 1px solid var(--border-color);
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 14px 20px;
-      font-size: 13.5px;
-      color: var(--text-main);
-      border-bottom: 1px solid var(--border-color);
-      vertical-align: middle;
-    }
-
-    tbody tr {
-      transition: background 0.15s ease;
-    }
-
-    tbody tr:hover {
-      background: #f8fafc;
-    }
-
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .ticket-id {
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    .company-name {
-      font-weight: 500;
-    }
-
-    .request-text {
-      color: #334155;
-      max-width: 260px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    /* Status Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-    }
-
-    .b-open { background: #fffbeb; color: #b45309; }
-    .b-open .badge-dot { background: #f59e0b; }
-
-    .b-progress { background: #eff6ff; color: #1d4ed8; }
-    .b-progress .badge-dot { background: #3b82f6; }
-
-    .b-close { background: #f0fdf4; color: #15803d; }
-    .b-close .badge-dot { background: #22c55e; }
-
-    .b-cancel { background: #f1f5f9; color: #64748b; }
-    .b-cancel .badge-dot { background: #94a3b8; }
-
-    /* Star Rating Cell */
-    .rating-stars {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      color: var(--star-active);
-      font-size: 13px;
-    }
-
-    .rating-none {
-      color: #94a3b8;
-      font-size: 12px;
-      font-style: italic;
-    }
-
-    /* Skeleton Loading State */
-    .skeleton {
-      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: 6px;
-      height: 16px;
-    }
-
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    @media (max-width: 640px) {
-      body { padding: 16px 10px; }
-      .dashboard-header { padding: 16px; }
-      .table-header { padding: 14px 16px; }
-      td, th { padding: 10px 14px; }
-    }
-  </style>
-</head>
-<body>
-
-<div class="wrap">
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="header-title">
-      <h1><i class="fa-solid fa-chart-pie"></i> Báo cáo Helpdesk Hôm nay</h1>
-      <div class="sub">
-        <i class="fa-regular fa-clock"></i>
-        <span id="today-label">Đang tải thời gian...</span>
-      </div>
-    </div>
-    <button class="btn-refresh" onclick="refreshData()">
-      <i class="fa-solid fa-rotate-right" id="refresh-icon"></i> Làm mới dữ liệu
-    </button>
-  </div>
-
-  <!-- KPI Grid -->
-  <div class="grid" id="stats">
-    <div class="stat-card">
-      <div class="stat-icon blue"><i class="fa-solid fa-ticket"></i></div>
-      <div class="stat-info">
-        <div class="num">-</div>
-        <div class="label">Ticket hôm nay</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
-      <div class="stat-info">
-        <div class="num">-</div>
-        <div class="label">Đã đóng hôm nay</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon amber"><i class="fa-solid fa-folder-open"></i></div>
-      <div class="stat-info">
-        <div class="num">-</div>
-        <div class="label">Đang mở (tất cả)</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon purple"><i class="fa-solid fa-stopwatch"></i></div>
-      <div class="stat-info">
-        <div class="num">-</div>
-        <div class="label">TB giờ xử lý</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Table Card -->
-  <div class="table-card">
-    <div class="table-header">
-      <span>Danh sách sự vụ mới nhất</span>
-      <span style="font-size: 12px; font-weight: 500; color: var(--text-muted);">Tối đa 20 bản ghi</span>
-    </div>
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Mã Ticket</th>
-            <th>Khách hàng / Đơn vị</th>
-            <th>Nội dung sự vụ</th>
-            <th>Kỹ thuật hỗ trợ</th>
-            <th>Trạng thái</th>
-            <th>Đánh giá</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <!-- Skeleton Loading Rows -->
-          <tr>
-            <td><div class="skeleton" style="width: 60px;"></div></td>
-            <td><div class="skeleton" style="width: 100px;"></div></td>
-            <td><div class="skeleton" style="width: 180px;"></div></td>
-            <td><div class="skeleton" style="width: 90px;"></div></td>
-            <td><div class="skeleton" style="width: 70px;"></div></td>
-            <td><div class="skeleton" style="width: 80px;"></div></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<script>
-// ====== CẤU HÌNH SUPABASE ======
-const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34";
-
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-function statusBadge(status) {
-  const map = {
-    'Open': ['b-open', 'Mở sự vụ'],
-    'In_progress': ['b-progress', 'Đang xử lý'],
-    'Wait_Confirm': ['b-progress', 'Chờ xác nhận'],
-    'Pending': ['b-open', 'Tạm hoãn'],
-    'Fix': ['b-progress', 'Chỉnh sửa'],
-    'Close': ['b-close', 'Đã đóng'],
-    'Cancel': ['b-cancel', 'Đã hủy']
-  };
-  const [cls, label] = map[status] || ['b-open', status];
-  return `<span class="badge ${cls}"><span class="badge-dot"></span>${label}</span>`;
-}
-
-function ratingCell(t) {
-  if (t.Rating_Stars) {
-    let starsHtml = '';
-    for (let i = 1; i <= 5; i++) {
-      if (i <= t.Rating_Stars) {
-        starsHtml += `<i class="fa-solid fa-star"></i>`;
-      } else {
-        starsHtml += `<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>`;
+    <style>
+      :root {
+        --primary: #2563eb;
+        --primary-hover: #1d4ed8;
+        --bg-body: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --star-active: #f59e0b;
+        --shadow-sm:
+          0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+        --shadow-md:
+          0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       }
-    }
-    return `<div class="rating-stars">${starsHtml} <span style="margin-left: 4px; font-weight: 600; color: #334155;">(${t.Rating_Stars})</span></div>`;
-  }
-  return `<span class="rating-none">Chưa đánh giá</span>`;
-}
 
-async function refreshData() {
-  const icon = document.getElementById('refresh-icon');
-  icon.classList.add('spin');
-  await init();
-  setTimeout(() => icon.classList.remove('spin'), 600);
-}
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-async function init() {
-  const now = new Date();
-  document.getElementById('today-label').textContent = 
-    'Cập nhật lúc ' + now.toLocaleTimeString('vi-VN') + ' - ' + now.toLocaleDateString('vi-VN');
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-main);
+        min-height: 100vh;
+        padding: 32px 16px;
+      }
 
-  // Fetch Stats KPI
-  const { data: stats } = await supabaseClient.from('v_report_today').select('*').single();
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
 
-  const statEls = document.querySelectorAll('.stat-card .num');
-  if (stats) {
-    statEls[0].textContent = stats.tickets_today ?? 0;
-    statEls[1].textContent = stats.closed_today ?? 0;
-    statEls[2].textContent = stats.open_now ?? 0;
-    statEls[3].textContent = (stats.avg_resolve_hours ?? '-') + (stats.avg_resolve_hours != null ? ' h' : '');
-  }
+      /* Header Section */
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 28px;
+        background: var(--card-bg);
+        padding: 20px 24px;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+      }
 
-  // Fetch Ticket Table
-  const { data: tickets, error } = await supabaseClient
-    .from('v_ticket_public')
-    .select('*')
-    .order('Ticket_ID', { ascending: false })
-    .limit(20);
+      .header-title h1 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-main);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
 
-  const rowsEl = document.getElementById('rows');
-  if (error || !tickets || tickets.length === 0) {
-    rowsEl.innerHTML = `
+      .header-title h1 i {
+        color: var(--primary);
+      }
+
+      .header-title .sub {
+        color: var(--text-muted);
+        font-size: 13px;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-refresh {
+        background: #eff6ff;
+        color: var(--primary);
+        border: 1px solid #bfdbfe;
+        padding: 10px 18px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .btn-refresh:hover {
+        background: #dbeafe;
+        transform: translateY(-1px);
+      }
+
+      .btn-refresh i.spin {
+        animation: spin 0.8s linear infinite;
+      }
+
+      /* KPI Grid */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+
+      .stat-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 20px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.2s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .stat-icon.blue {
+        background: #eff6ff;
+        color: #2563eb;
+      }
+      .stat-icon.green {
+        background: #f0fdf4;
+        color: #16a34a;
+      }
+      .stat-icon.amber {
+        background: #fffbeb;
+        color: #d97706;
+      }
+      .stat-icon.purple {
+        background: #faf5ff;
+        color: #9333ea;
+      }
+
+      .stat-info .num {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-main);
+        line-height: 1.2;
+      }
+
+      .stat-info .label {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        margin-top: 2px;
+      }
+
+      /* Table Container */
+      .table-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+      }
+
+      .table-header {
+        padding: 18px 24px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-main);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+      }
+
+      th {
+        background: #f8fafc;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 14px 20px;
+        font-size: 13.5px;
+        color: var(--text-main);
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+      }
+
+      tbody tr {
+        transition: background 0.15s ease;
+      }
+
+      tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .ticket-id {
+        font-weight: 600;
+        color: var(--primary);
+      }
+
+      .company-name {
+        font-weight: 500;
+      }
+
+      .request-text {
+        color: #334155;
+        max-width: 260px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Status Badges */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+      }
+
+      .b-open {
+        background: #fffbeb;
+        color: #b45309;
+      }
+      .b-open .badge-dot {
+        background: #f59e0b;
+      }
+
+      .b-progress {
+        background: #eff6ff;
+        color: #1d4ed8;
+      }
+      .b-progress .badge-dot {
+        background: #3b82f6;
+      }
+
+      .b-close {
+        background: #f0fdf4;
+        color: #15803d;
+      }
+      .b-close .badge-dot {
+        background: #22c55e;
+      }
+
+      .b-cancel {
+        background: #f1f5f9;
+        color: #64748b;
+      }
+      .b-cancel .badge-dot {
+        background: #94a3b8;
+      }
+
+      /* Star Rating Cell */
+      .rating-stars {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        color: var(--star-active);
+        font-size: 13px;
+      }
+
+      .rating-none {
+        color: #94a3b8;
+        font-size: 12px;
+        font-style: italic;
+      }
+
+      /* Skeleton Loading State */
+      .skeleton {
+        background: linear-gradient(
+          90deg,
+          #f1f5f9 25%,
+          #e2e8f0 50%,
+          #f1f5f9 75%
+        );
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 6px;
+        height: 16px;
+      }
+
+      @keyframes loading {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 640px) {
+        body {
+          padding: 16px 10px;
+        }
+        .dashboard-header {
+          padding: 16px;
+        }
+        .table-header {
+          padding: 14px 16px;
+        }
+        td,
+        th {
+          padding: 10px 14px;
+        }
+      }
+
+      .header-logo {
+        height: 28px; /* Chiều cao khớp với chữ */
+        width: auto; /* Tự điều chỉnh chiều rộng theo tỉ lệ */
+        object-fit: contain;
+        vertical-align: middle;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- Header -->
+      <div class="dashboard-header">
+        <div class="header-title">
+          <!-- MỚI: Dùng thẻ <img> -->
+          <h1>
+            <img src="hkt.jpg" alt="Logo" class="header-logo" />
+            Báo cáo Helpdesk Tổng hợp
+          </h1>
+          <div class="sub">
+            <i class="fa-regular fa-clock"></i>
+            <span id="today-label">Đang tải thời gian...</span>
+          </div>
+        </div>
+        <button class="btn-refresh" onclick="refreshData()">
+          <i class="fa-solid fa-rotate-right" id="refresh-icon"></i> Làm mới dữ
+          liệu
+        </button>
+      </div>
+
+      <!-- KPI Grid -->
+      <div class="grid" id="stats">
+        <div class="stat-card">
+          <div class="stat-icon blue"><i class="fa-solid fa-ticket"></i></div>
+          <div class="stat-info">
+            <div class="num">-</div>
+            <div class="label">Tổng công việc</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <div class="stat-info">
+            <div class="num">-</div>
+            <div class="label">Đã hoàn tất</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">
+            <i class="fa-solid fa-hourglass-half"></i>
+          </div>
+          <div class="stat-info">
+            <div class="num">-</div>
+            <div class="label">Chờ xác nhận</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon purple">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <div class="stat-info">
+            <div class="num">-</div>
+            <div class="label">Chưa hoàn tất</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Card -->
+      <div class="table-card">
+        <div class="table-header">
+          <span>Danh sách sự vụ mới nhất</span>
+          <span
+            style="font-size: 12px; font-weight: 500; color: var(--text-muted)"
+            >Tối đa 20 bản ghi</span
+          >
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Mã Ticket</th>
+                <th>Công ty / Khách sạn</th>
+                <th>Người yêu cầu</th>
+                <th>Nội dung yêu cầu</th>
+                <th>Thời gian tạo</th>
+                <th>CS Phản hồi</th>
+                <th>KT Hoàn tất</th>
+                <th>Trạng thái</th>
+                <th>Đánh giá KH</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <!-- Skeleton Loading Rows -->
+              <tr>
+                <td><div class="skeleton" style="width: 60px"></div></td>
+                <td><div class="skeleton" style="width: 100px"></div></td>
+                <td><div class="skeleton" style="width: 90px"></div></td>
+                <td><div class="skeleton" style="width: 180px"></div></td>
+                <td><div class="skeleton" style="width: 90px"></div></td>
+                <td><div class="skeleton" style="width: 90px"></div></td>
+                <td><div class="skeleton" style="width: 90px"></div></td>
+                <td><div class="skeleton" style="width: 70px"></div></td>
+                <td><div class="skeleton" style="width: 80px"></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ====== CẤU HÌNH SUPABASE ======
+      const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34";
+
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+
+      function statusBadge(status) {
+        const map = {
+          Open: ["b-open", "Mở sự vụ"],
+          In_progress: ["b-progress", "Đang xử lý"],
+          Wait_Confirm: ["b-progress", "Chờ xác nhận"],
+          Pending: ["b-open", "Tạm hoãn"],
+          Fix: ["b-progress", "Chỉnh sửa"],
+          Close: ["b-close", "Đã đóng"],
+          Cancel: ["b-cancel", "Đã hủy"],
+        };
+        const [cls, label] = map[status] || ["b-open", status];
+        return `<span class="badge ${cls}"><span class="badge-dot"></span>${label}</span>`;
+      }
+
+      function ratingCell(t) {
+        if (t.Rating_Stars) {
+          let starsHtml = "";
+          for (let i = 1; i <= 5; i++) {
+            if (i <= t.Rating_Stars) {
+              starsHtml += `<i class="fa-solid fa-star"></i>`;
+            } else {
+              starsHtml += `<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>`;
+            }
+          }
+          return `<div class="rating-stars">${starsHtml} <span style="margin-left: 4px; font-weight: 600; color: #334155;">(${t.Rating_Stars})</span></div>`;
+        }
+        return `<span class="rating-none">Chưa đánh giá</span>`;
+      }
+
+      function formatDateTime(value) {
+        if (!value) return '<span class="rating-none">-</span>';
+        const d = new Date(value);
+        if (isNaN(d.getTime())) return "-";
+        return d.toLocaleString("vi-VN", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      async function refreshData() {
+        const icon = document.getElementById("refresh-icon");
+        icon.classList.add("spin");
+        await init();
+        setTimeout(() => icon.classList.remove("spin"), 600);
+      }
+
+      async function init() {
+        const now = new Date();
+        document.getElementById("today-label").textContent =
+          "Cập nhật lúc " +
+          now.toLocaleTimeString("vi-VN") +
+          " - " +
+          now.toLocaleDateString("vi-VN");
+
+        // Fetch Stats KPI (tổng hợp toàn bộ, không giới hạn hôm nay)
+        const { data: stats } = await supabaseClient
+          .from("v_report_summary")
+          .select("*")
+          .single();
+
+        const statEls = document.querySelectorAll(".stat-card .num");
+        if (stats) {
+          statEls[0].textContent = stats.total_tickets ?? 0;
+          statEls[1].textContent = stats.completed ?? 0;
+          statEls[2].textContent = stats.awaiting_confirm ?? 0;
+          statEls[3].textContent = stats.not_completed ?? 0;
+        }
+
+        // Fetch Ticket Table
+        const { data: tickets, error } = await supabaseClient
+          .from("v_ticket_public")
+          .select("*")
+          .order("Ticket_ID", { ascending: false })
+          .limit(20);
+
+        const rowsEl = document.getElementById("rows");
+        if (error || !tickets || tickets.length === 0) {
+          rowsEl.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+        <td colspan="9" style="text-align: center; padding: 32px; color: var(--text-muted);">
           <i class="fa-solid fa-inbox" style="font-size: 32px; margin-bottom: 8px; color: #cbd5e1;"></i>
-          <div>Chưa có dữ liệu ticket nào hôm nay.</div>
+          <div>Chưa có dữ liệu ticket nào.</div>
         </td>
       </tr>`;
-    return;
-  }
+          return;
+        }
 
-  rowsEl.innerHTML = tickets.map(t => `
+        rowsEl.innerHTML = tickets
+          .map(
+            (t) => `
     <tr>
       <td><span class="ticket-id">#${t.Ticket_ID}</span></td>
-      <td><span class="company-name">${t.Company || '-'}</span></td>
-      <td><div class="request-text" title="${t.Request || ''}">${t.Request || '-'}</div></td>
-      <td>${t.Staff || '-'}</td>
+      <td><span class="company-name">${t.Company || "-"}</span></td>
+      <td>${t.Customer || "-"}</td>
+      <td><div class="request-text" title="${t.Request || ""}">${t.Request || "-"}</div></td>
+      <td>${formatDateTime(t.Created_time)}</td>
+      <td>${formatDateTime(t.Reception_time)}</td>
+      <td>${formatDateTime(t.Resolve_time)}</td>
       <td>${statusBadge(t.Status)}</td>
       <td>${ratingCell(t)}</td>
     </tr>
-  `).join('');
-}
+  `,
+          )
+          .join("");
+      }
 
-init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>

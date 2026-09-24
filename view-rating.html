@@ -1,288 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HKT Solutions - Xem đánh giá dịch vụ</title>
-  
-  <!-- Font Google Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HKT Solutions - Xem đánh giá dịch vụ</title>
 
-  <style>
-    :root {
-      --primary: #2563eb;
-      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      --card-bg: #ffffff;
-      --text-main: #0f172a;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-      --star-active: #f59e0b;
-      --star-inactive: #cbd5e1;
-      --success: #10b981;
-      --error: #ef4444;
-      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-    }
+    <!-- Font Google Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <!-- FontAwesome Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-main);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px 16px;
-    }
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    .card {
-      width: 100%;
-      max-width: 520px;
-      background: var(--card-bg);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      border: 1px solid rgba(255, 255, 255, 0.8);
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
+    <style>
+      :root {
+        --primary: #2563eb;
+        --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        --card-bg: #ffffff;
+        --text-main: #0f172a;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --star-active: #f59e0b;
+        --star-inactive: #cbd5e1;
+        --success: #10b981;
+        --error: #ef4444;
+        --shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.05),
+          0 8px 10px -6px rgba(0, 0, 0, 0.01);
+      }
 
-    .card-header {
-      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-      color: #ffffff;
-      padding: 28px 24px;
-      text-align: center;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    .card-header .logo-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(8px);
-      border-radius: 12px;
-      margin-bottom: 12px;
-      color: #60a5fa;
-      font-size: 20px;
-    }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-gradient);
+        color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px 16px;
+      }
 
-    .card-header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
+      .card {
+        width: 100%;
+        max-width: 520px;
+        background: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
 
-    .card-header .sub {
-      color: #94a3b8;
-      font-size: 13px;
-      margin-top: 4px;
-      font-weight: 400;
-    }
+      .card-header {
+        background: linear-gradient(135deg, #9af1f4 0%, #59ede3 100%);
+        color: #ffffff;
+        padding: 28px 24px;
+        text-align: center;
+        position: relative;
+      }
 
-    .card-body {
-      padding: 24px;
-    }
+      .card-header .logo-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px; /* Kích thước khung chứa logo */
+        height: 56px;
+        background: rgba(255, 255, 255, 0.15); /* Nền mờ xuyên thấu */
+        backdrop-filter: blur(8px);
+        border-radius: 14px;
+        margin-bottom: 12px;
+        padding: 6px; /* Khoảng đệm xung quanh logo */
+        overflow: hidden;
+      }
 
-    /* Ticket Info Grid */
-    .info-card {
-      background: #f8fafc;
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+      /* Thêm CSS quy định kích thước cho ảnh logo bên trong */
+      .card-header .logo-badge img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* Giữ đúng tỉ lệ ảnh, không bị méo/biến dạng */
+        display: block;
+      }
 
-    .info-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      font-size: 14px;
-    }
+      .card-header h1 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
 
-    .info-item i {
-      color: #3b82f6;
-      width: 18px;
-      margin-top: 3px;
-      text-align: center;
-    }
+      .card-header .sub {
+        color: #94a3b8;
+        font-size: 13px;
+        margin-top: 4px;
+        font-weight: 400;
+      }
 
-    .info-label {
-      color: var(--text-muted);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
+      .card-body {
+        padding: 24px;
+      }
 
-    .info-value {
-      color: var(--text-main);
-      font-weight: 500;
-      line-height: 1.4;
-    }
+      /* Ticket Info Grid */
+      .info-card {
+        background: #f8fafc;
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
 
-    /* Rating Result Displays */
-    .msg-box {
-      text-align: center;
-      padding: 24px 16px;
-      border-radius: 14px;
-      animation: fadeIn 0.3s ease;
-    }
+      .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        font-size: 14px;
+      }
 
-    .msg-box.success {
-      background: #f0fdf4;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
+      .info-item i {
+        color: #3b82f6;
+        width: 18px;
+        margin-top: 3px;
+        text-align: center;
+      }
 
-    .msg-box.pending {
-      background: #f8fafc;
-      color: #475569;
-      border: 1px solid #e2e8f0;
-    }
+      .info-label {
+        color: var(--text-muted);
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
 
-    .msg-box.error {
-      background: #fef2f2;
-      color: var(--error);
-      border: 1px solid #fecaca;
-    }
+      .info-value {
+        color: var(--text-main);
+        font-weight: 500;
+        line-height: 1.4;
+      }
 
-    .msg-icon {
-      font-size: 40px;
-      margin-bottom: 12px;
-    }
+      /* Rating Result Displays */
+      .msg-box {
+        text-align: center;
+        padding: 24px 16px;
+        border-radius: 14px;
+        animation: fadeIn 0.3s ease;
+      }
 
-    .stars-display {
-      display: flex;
-      justify-content: center;
-      gap: 6px;
-      margin: 10px 0;
-      font-size: 28px;
-    }
+      .msg-box.success {
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+      }
 
-    .comment-quote {
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.7);
-      border-left: 3px solid #10b981;
-      border-radius: 6px;
-      font-style: italic;
-      color: #334155;
-      font-size: 13.5px;
-      text-align: left;
-    }
+      .msg-box.pending {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
 
-    /* Loading Spinner */
-    .loading-spinner {
-      text-align: center;
-      padding: 40px 0;
-      color: var(--text-muted);
-    }
+      .msg-box.error {
+        background: #fef2f2;
+        color: var(--error);
+        border: 1px solid #fecaca;
+      }
 
-    .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid var(--primary);
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
-    }
+      .msg-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+      }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+      .stars-display {
+        display: flex;
+        justify-content: center;
+        gap: 6px;
+        margin: 10px 0;
+        font-size: 28px;
+      }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-  </style>
-</head>
-<body>
+      .comment-quote {
+        margin-top: 12px;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.7);
+        border-left: 3px solid #10b981;
+        border-radius: 6px;
+        font-style: italic;
+        color: #334155;
+        font-size: 13.5px;
+        text-align: left;
+      }
 
-<div class="card">
-  <div class="card-header">
-    <div class="logo-badge">
-      <i class="fa-solid fa-star-half-stroke"></i>
+      /* Loading Spinner */
+      .loading-spinner {
+        text-align: center;
+        padding: 40px 0;
+        color: var(--text-muted);
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid var(--primary);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 12px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <!-- MỚI: Thay icon bằng thẻ <img> chứa logo -->
+      <div class="card-header">
+        <div class="logo-badge">
+          <img src="hkt.jpg" alt="HKT Logo" />
+        </div>
+        <h1>HKT Solutions</h1>
+        <div class="sub">Trung tâm đánh giá chất lượng dịch vụ</div>
+      </div>
+
+      <div class="card-body" id="content">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <div>Đang tải thông tin sự vụ...</div>
+        </div>
+      </div>
     </div>
-    <h1>HKT Solutions</h1>
-    <div class="sub">Trung tâm đánh giá dịch vụ</div>
-  </div>
 
-  <div class="card-body" id="content">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <div>Đang tải thông tin sự vụ...</div>
-    </div>
-  </div>
-</div>
+    <script>
+      // ====== CẤU HÌNH SUPABASE ======
+      const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34";
 
-<script>
-// ====== CẤU HÌNH SUPABASE ======
-const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34";
+      const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_ANON_KEY,
+      );
+      const params = new URLSearchParams(window.location.search);
+      const ticketId = params.get("ticket_id");
+      const contentEl = document.getElementById("content");
 
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-const params = new URLSearchParams(window.location.search);
-const ticketId = params.get('ticket_id');
-const contentEl = document.getElementById('content');
+      const starTexts = {
+        1: "Không hài lòng",
+        2: "Tạm ổn",
+        3: "Hài lòng",
+        4: "Rất hài lòng",
+        5: "Xuất sắc",
+      };
 
-const starTexts = {
-  1: 'Không hài lòng',
-  2: 'Tạm ổn',
-  3: 'Hài lòng',
-  4: 'Rất hài lòng',
-  5: 'Xuất sắc'
-};
-
-async function init() {
-  try {
-    if (!ticketId) {
-      contentEl.innerHTML = `
+      async function init() {
+        try {
+          if (!ticketId) {
+            contentEl.innerHTML = `
         <div class="msg-box error">
           <div class="msg-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
           <b>Thao tác không hợp lệ</b>
           <div style="font-size: 13px; margin-top: 4px;">Thiếu mã ticket_id trên đường dẫn.</div>
         </div>`;
-      return;
-    }
+            return;
+          }
 
-    const { data: ticket, error } = await supabaseClient
-      .from('v_ticket_public')
-      .select('*')
-      .eq('Ticket_ID', ticketId)
-      .single();
+          const { data: ticket, error } = await supabaseClient
+            .from("v_ticket_public")
+            .select("*")
+            .eq("Ticket_ID", ticketId)
+            .single();
 
-    if (error || !ticket) {
-      contentEl.innerHTML = `
+          if (error || !ticket) {
+            contentEl.innerHTML = `
         <div class="msg-box error">
           <div class="msg-icon"><i class="fa-solid fa-magnifying-glass-minus"></i></div>
           <b>Không tìm thấy dữ liệu</b>
           <div style="font-size: 13px; margin-top: 4px;">Không tồn tại sự vụ với mã <b>${ticketId}</b>.</div>
         </div>`;
-      return;
-    }
+            return;
+          }
 
-    const infoCardHtml = `
+          const infoCardHtml = `
       <div class="info-card">
         <div class="info-item">
           <i class="fa-solid fa-ticket"></i>
@@ -295,33 +330,35 @@ async function init() {
           <i class="fa-solid fa-hotel"></i>
           <div>
             <div class="info-label">Khách hàng / Đơn vị</div>
-            <div class="info-value">${ticket.Company || '-'}</div>
+            <div class="info-value">${ticket.Company || "-"}</div>
           </div>
         </div>
         <div class="info-item">
           <i class="fa-solid fa-clipboard-list"></i>
           <div>
             <div class="info-label">Nội dung yêu cầu</div>
-            <div class="info-value">${ticket.Request || '-'}</div>
+            <div class="info-value">${ticket.Request || "-"}</div>
           </div>
         </div>
         <div class="info-item">
           <i class="fa-solid fa-user-gear"></i>
           <div>
             <div class="info-label">Kỹ thuật viên hỗ trợ</div>
-            <div class="info-value">${ticket.Staff || '-'}</div>
+            <div class="info-value">${ticket.Staff || "-"}</div>
           </div>
         </div>
       </div>
     `;
 
-    if (ticket.Rating_Stars) {
-      let starsHtml = '';
-      for (let i = 1; i <= 5; i++) {
-        starsHtml += `<i class="fa-solid fa-star" style="color: ${i <= ticket.Rating_Stars ? 'var(--star-active)' : 'var(--star-inactive)'}"></i>`;
-      }
+          if (ticket.Rating_Stars) {
+            let starsHtml = "";
+            for (let i = 1; i <= 5; i++) {
+              starsHtml += `<i class="fa-solid fa-star" style="color: ${i <= ticket.Rating_Stars ? "var(--star-active)" : "var(--star-inactive)"}"></i>`;
+            }
 
-      contentEl.innerHTML = infoCardHtml + `
+            contentEl.innerHTML =
+              infoCardHtml +
+              `
         <div class="msg-box success">
           <div class="msg-icon" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
           <div style="font-size: 15px; font-weight: 700; color: #0f172a;">Đã có đánh giá từ khách hàng</div>
@@ -329,33 +366,35 @@ async function init() {
           <div class="stars-display">${starsHtml}</div>
           
           <div style="font-size: 14px; font-weight: 600; color: #1e293b;">
-            ${ticket.Rating_Stars}/5 Sao - ${starTexts[ticket.Rating_Stars] || ''}
+            ${ticket.Rating_Stars}/5 Sao - ${starTexts[ticket.Rating_Stars] || ""}
           </div>
           
-          ${ticket.Rating_Comment ? `<div class="comment-quote"><i class="fa-solid fa-quote-left" style="margin-right: 6px; color: #a7f3d0;"></i>"${ticket.Rating_Comment}"</div>` : ''}
+          ${ticket.Rating_Comment ? `<div class="comment-quote"><i class="fa-solid fa-quote-left" style="margin-right: 6px; color: #a7f3d0;"></i>"${ticket.Rating_Comment}"</div>` : ""}
         </div>
       `;
-    } else {
-      contentEl.innerHTML = infoCardHtml + `
+          } else {
+            contentEl.innerHTML =
+              infoCardHtml +
+              `
         <div class="msg-box pending">
           <div class="msg-icon" style="color: #94a3b8;"><i class="fa-regular fa-clock"></i></div>
           <div style="font-size: 15px; font-weight: 600; color: #334155;">Khách hàng chưa đánh giá</div>
           <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Sự vụ này chưa nhận được phản hồi chất lượng dịch vụ.</div>
         </div>
       `;
-    }
-  } catch (err) {
-    contentEl.innerHTML = `
+          }
+        } catch (err) {
+          contentEl.innerHTML = `
       <div class="msg-box error">
         <div class="msg-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <b>Có lỗi xảy ra</b>
         <div style="font-size: 13px; margin-top: 4px;">${err.message}</div>
       </div>`;
-    console.error(err);
-  }
-}
+          console.error(err);
+        }
+      }
 
-init();
-</script>
-</body>
+      init();
+    </script>
+  </body>
 </html>
