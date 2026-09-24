@@ -1,64 +1,355 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HKT Solutions - Trung tâm đánh giá dịch vụ</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  body { font-family: 'Segoe UI', Arial, sans-serif; background:#f4f6f8; margin:0; padding:20px; }
-  .card { max-width:480px; margin:30px auto; background:#fff; border-radius:14px; box-shadow:0 4px 20px rgba(0,0,0,.08); padding:28px; }
-  h1 { font-size:20px; color:#1a2b4c; margin-bottom:4px; }
-  .sub { color:#888; font-size:13px; margin-bottom:20px; }
-  .info { background:#f8f9fb; border-radius:10px; padding:14px 16px; margin-bottom:22px; font-size:14px; line-height:1.6; }
-  .info b { color:#1a2b4c; }
-  .stars { display:flex; gap:8px; justify-content:center; margin:18px 0; }
-  .stars span { font-size:38px; cursor:pointer; color:#ddd; transition:.15s; }
-  .stars span.active { color:#f5a623; }
-  textarea { width:100%; box-sizing:border-box; border:1px solid #ddd; border-radius:8px; padding:10px; font-size:14px; min-height:80px; resize:vertical; }
-  button { width:100%; margin-top:16px; background:#1a73e8; color:#fff; border:none; padding:12px; border-radius:8px; font-size:15px; cursor:pointer; }
-  button:disabled { background:#aac6f4; cursor:not-allowed; }
-  .msg { text-align:center; padding:30px 10px; }
-  .msg.success { color:#1a7f37; }
-  .msg.error { color:#c62828; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HKT Solutions - Trung tâm đánh giá dịch vụ</title>
+  
+  <!-- Font Google Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --star-active: #f59e0b;
+      --star-inactive: #cbd5e1;
+      --success: #10b981;
+      --error: #ef4444;
+      --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--card-bg);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #ffffff;
+      padding: 28px 24px;
+      text-align: center;
+      position: relative;
+    }
+
+    .card-header .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      color: #60a5fa;
+      font-size: 20px;
+    }
+
+    .card-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .card-header .sub {
+      color: #94a3b8;
+      font-size: 13px;
+      margin-top: 4px;
+      font-weight: 400;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    /* Ticket Info Grid */
+    .info-card {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+    }
+
+    .info-item i {
+      color: #3b82f6;
+      width: 18px;
+      margin-top: 3px;
+      text-align: center;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .info-value {
+      color: var(--text-main);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    /* Star Rating */
+    .rating-section {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .rating-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .stars {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 12px 0 6px;
+      direction: ltr;
+    }
+
+    .stars i {
+      font-size: 36px;
+      color: var(--star-inactive);
+      cursor: pointer;
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    .stars i:hover,
+    .stars i.active {
+      color: var(--star-active);
+    }
+
+    .stars i:hover {
+      transform: scale(1.15);
+    }
+
+    .star-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--primary);
+      height: 18px;
+    }
+
+    /* Form Inputs */
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text-main);
+      background-color: #fff;
+      min-height: 90px;
+      resize: vertical;
+      outline: none;
+      transition: all 0.2s ease;
+      margin-top: 14px;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    button.btn-submit {
+      width: 100%;
+      margin-top: 18px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    button.btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    button.btn-submit:disabled {
+      background: #cbd5e1;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    /* Status Messages */
+    .msg-box {
+      text-align: center;
+      padding: 24px 12px;
+      border-radius: 12px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .msg-box.error {
+      background: #fef2f2;
+      color: var(--error);
+      border: 1px solid #fecaca;
+    }
+
+    .msg-box.success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    .msg-icon {
+      font-size: 44px;
+      margin-bottom: 12px;
+    }
+
+    .loading-spinner {
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
+
 <div class="card" id="app">
-  <h1>HKT Solutions</h1>
-  <div class="sub">Trung tâm đánh giá dịch vụ</div>
-  <div id="content">Đang tải thông tin sự vụ...</div>
+  <div class="card-header">
+    <div class="logo-badge">
+      <i class="fa-solid fa-headset"></i>
+    </div>
+    <h1>HKT Solutions</h1>
+    <div class="sub">Trung tâm đánh giá chất lượng dịch vụ</div>
+  </div>
+
+  <div class="card-body" id="content">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <div>Đang tải thông tin...</div>
+    </div>
+  </div>
 </div>
 
 <script>
-// ====== CẤU HÌNH - THAY BẰNG THÔNG TIN SUPABASE CỦA BẠN ======
+// ====== CẤU HÌNH SUPABASE ======
 const SUPABASE_URL = "https://hhmuiarznaawrlpobliu.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34"; // anon public key
-// ================================================================
-
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhobXVpYXJ6bmFhd3JscG9ibGl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTMwMjcsImV4cCI6MjEwNTYyOTAyN30.EL8C-bpNfE9K4IYiAWCFGzgJuR_DQQIu8HURg9EEs34";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const params = new URLSearchParams(window.location.search);
 const ticketId = params.get('ticket_id');
 const contentEl = document.getElementById('content');
 
+const starTexts = {
+  1: 'Không hài lòng',
+  2: 'Tạm ổn',
+  3: 'Hài lòng',
+  4: 'Rất hài lòng',
+  5: 'Xuất sắc'
+};
+
 let selectedStars = 0;
 
 async function init() {
   try {
     if (!ticketId) {
-      contentEl.innerHTML = `<div class="msg error">Thiếu mã ticket_id trên đường dẫn.</div>`;
+      contentEl.innerHTML = `
+        <div class="msg-box error">
+          <div class="msg-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+          <b>Thao tác không hợp lệ</b>
+          <div style="font-size:13px; margin-top:4px;">Không tìm thấy mã ticket_id trên đường dẫn.</div>
+        </div>`;
       return;
     }
     await loadAndRender();
   } catch (err) {
-    contentEl.innerHTML = `<div class="msg error">Có lỗi xảy ra: ${err.message}</div>`;
+    contentEl.innerHTML = `
+      <div class="msg-box error">
+        <div class="msg-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <b>Có lỗi xảy ra</b>
+        <div style="font-size:13px; margin-top:4px;">${err.message}</div>
+      </div>`;
     console.error(err);
   }
 }
 
 async function loadAndRender() {
-
   const { data: ticket, error } = await supabaseClient
     .from('v_ticket_public')
     .select('*')
@@ -66,7 +357,12 @@ async function loadAndRender() {
     .single();
 
   if (error || !ticket) {
-    contentEl.innerHTML = `<div class="msg error">Không tìm thấy sự vụ với mã <b>${ticketId}</b>.</div>`;
+    contentEl.innerHTML = `
+      <div class="msg-box error">
+        <div class="msg-icon"><i class="fa-solid fa-magnifying-glass-minus"></i></div>
+        <b>Không tìm thấy dữ liệu</b>
+        <div style="font-size:13px; margin-top:4px;">Không tồn tại sự vụ với mã <b>${ticketId}</b>.</div>
+      </div>`;
     return;
   }
 
@@ -76,56 +372,120 @@ async function loadAndRender() {
     .eq('Ticket_ID', ticketId)
     .maybeSingle();
 
-  if (existingRating) {
-    const starsDisplay = '★'.repeat(existingRating.Stars) + '☆'.repeat(5 - existingRating.Stars);
-    contentEl.innerHTML = `
-      <div class="info">
-        <div><b>Mã sự vụ:</b> ${ticket.Ticket_ID}</div>
-        <div><b>Khách sạn:</b> ${ticket.Company || '-'}</div>
-        <div><b>Nội dung:</b> ${ticket.Request || '-'}</div>
-        <div><b>Kỹ thuật hỗ trợ:</b> ${ticket.Staff || '-'}</div>
+  // render card chi tiết sự vụ
+  const infoCardHTML = `
+    <div class="info-card">
+      <div class="info-item">
+        <i class="fa-solid fa-ticket"></i>
+        <div>
+          <div class="info-label">Mã sự vụ</div>
+          <div class="info-value">#${ticket.Ticket_ID}</div>
+        </div>
       </div>
-      <div class="msg success" style="padding:10px 0;">
-        <div style="font-size:32px;color:#f5a623;">${starsDisplay}</div>
-        <div style="margin-top:8px;">Đã đánh giá: <b>${existingRating.Stars}/5 sao</b></div>
-        ${existingRating.Comment ? `<div style="margin-top:8px;color:#555;font-style:italic;">"${existingRating.Comment}"</div>` : ''}
-        <div style="margin-top:10px;font-size:12px;color:#999;">Cảm ơn bạn đã phản hồi!</div>
+      <div class="info-item">
+        <i class="fa-solid fa-hotel"></i>
+        <div>
+          <div class="info-label">Khách hàng / Đơn vị</div>
+          <div class="info-value">${ticket.Company || '-'}</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <i class="fa-solid fa-clipboard-list"></i>
+        <div>
+          <div class="info-label">Nội dung yêu cầu</div>
+          <div class="info-value">${ticket.Request || '-'}</div>
+        </div>
+      </div>
+      <div class="info-item">
+        <i class="fa-solid fa-user-gear"></i>
+        <div>
+          <div class="info-label">Kỹ thuật viên hỗ trợ</div>
+          <div class="info-value">${ticket.Staff || '-'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Trường hợp đã đánh giá trước đó
+  if (existingRating) {
+    let starsIcon = '';
+    for (let i = 1; i <= 5; i++) {
+      starsIcon += `<i class="fa-solid fa-star" style="color: ${i <= existingRating.Stars ? 'var(--star-active)' : 'var(--star-inactive)'}; font-size: 28px; margin: 0 2px;"></i>`;
+    }
+
+    contentEl.innerHTML = `
+      ${infoCardHTML}
+      <div class="msg-box success">
+        <div class="msg-icon"><i class="fa-solid fa-circle-check"></i></div>
+        <div style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+          Sự vụ này đã được đánh giá
+        </div>
+        <div style="margin: 10px 0;">${starsIcon}</div>
+        <div style="font-size: 14px; font-weight: 600; color: #334155;">
+          ${existingRating.Stars}/5 Sao - ${starTexts[existingRating.Stars] || ''}
+        </div>
+        ${existingRating.Comment ? `<div style="margin-top: 10px; font-style: italic; color: #475569; font-size: 13px;">"${existingRating.Comment}"</div>` : ''}
+        <div style="margin-top: 14px; font-size: 12px; color: #94a3b8;">Cảm ơn bạn đã hỗ trợ chúng tôi nâng cao chất lượng dịch vụ!</div>
       </div>
     `;
     return;
   }
 
+  // Trường hợp chưa đánh giá
   contentEl.innerHTML = `
-    <div class="info">
-      <div><b>Mã sự vụ:</b> ${ticket.Ticket_ID}</div>
-      <div><b>Khách sạn:</b> ${ticket.Company || '-'}</div>
-      <div><b>Nội dung:</b> ${ticket.Request || '-'}</div>
-      <div><b>Kỹ thuật hỗ trợ:</b> ${ticket.Staff || '-'}</div>
+    ${infoCardHTML}
+    <div class="rating-section">
+      <div class="rating-title">Bạn đánh giá thế nào về chất lượng hỗ trợ?</div>
+      <div class="stars" id="stars">
+        <i class="fa-solid fa-star" data-v="1"></i>
+        <i class="fa-solid fa-star" data-v="2"></i>
+        <i class="fa-solid fa-star" data-v="3"></i>
+        <i class="fa-solid fa-star" data-v="4"></i>
+        <i class="fa-solid fa-star" data-v="5"></i>
+      </div>
+      <div class="star-label" id="starLabel">Vui lòng chọn mức độ đánh giá</div>
     </div>
-    <div style="text-align:center;font-size:14px;color:#555;">Bạn đánh giá chất lượng hỗ trợ thế nào?</div>
-    <div class="stars" id="stars">
-      <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
-    </div>
-    <textarea id="comment" placeholder="Góp ý thêm (không bắt buộc)..."></textarea>
-    <button id="submitBtn" disabled>Gửi đánh giá</button>
+    <textarea id="comment" placeholder="Nhập thêm ý kiến góp ý của bạn (không bắt buộc)..."></textarea>
+    <button class="btn-submit" id="submitBtn" disabled>
+      <i class="fa-solid fa-paper-plane"></i> Gửi đánh giá
+    </button>
   `;
 
   const starsEl = document.getElementById('stars');
+  const starLabel = document.getElementById('starLabel');
   const submitBtn = document.getElementById('submitBtn');
+  const starIcons = starsEl.querySelectorAll('i');
 
-  starsEl.querySelectorAll('span').forEach(star => {
+  const updateStarsDisplay = (rating) => {
+    starIcons.forEach(s => {
+      const val = parseInt(s.dataset.v);
+      s.classList.toggle('active', val <= rating);
+    });
+  };
+
+  starIcons.forEach(star => {
+    star.addEventListener('mouseenter', () => {
+      const hoverVal = parseInt(star.dataset.v);
+      updateStarsDisplay(hoverVal);
+      starLabel.textContent = starTexts[hoverVal];
+    });
+
+    star.addEventListener('mouseleave', () => {
+      updateStarsDisplay(selectedStars);
+      starLabel.textContent = selectedStars ? starTexts[selectedStars] : 'Vui lòng chọn mức độ đánh giá';
+    });
+
     star.addEventListener('click', () => {
       selectedStars = parseInt(star.dataset.v);
-      starsEl.querySelectorAll('span').forEach(s => {
-        s.classList.toggle('active', parseInt(s.dataset.v) <= selectedStars);
-      });
+      updateStarsDisplay(selectedStars);
+      starLabel.textContent = starTexts[selectedStars];
       submitBtn.disabled = false;
     });
   });
 
   submitBtn.addEventListener('click', async () => {
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Đang gửi...';
+    submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...`;
     const comment = document.getElementById('comment').value;
 
     const { error: insertError } = await supabaseClient.from('Ticket_Rating').insert({
@@ -135,9 +495,21 @@ async function loadAndRender() {
     });
 
     if (insertError) {
-      contentEl.innerHTML = `<div class="msg error">Có lỗi khi gửi đánh giá: ${insertError.message}</div>`;
+      contentEl.innerHTML = `
+        <div class="msg-box error">
+          <div class="msg-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+          <b>Gửi thất bại</b>
+          <div style="font-size:13px; margin-top:4px;">${insertError.message}</div>
+        </div>`;
     } else {
-      contentEl.innerHTML = `<div class="msg success">🌟 Cảm ơn bạn đã đánh giá ${selectedStars} sao!<br/>HKT Solutions sẽ tiếp tục cải thiện dịch vụ.</div>`;
+      contentEl.innerHTML = `
+        <div class="msg-box success">
+          <div class="msg-icon"><i class="fa-solid fa-circle-check"></i></div>
+          <div style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">Cảm ơn bạn đã đánh giá!</div>
+          <div style="font-size: 14px; color: #334155;">
+            Bạn đã chọn <b>${selectedStars} sao</b> (${starTexts[selectedStars]}). HKT Solutions sẽ tiếp tục nỗ lực nâng cao chất lượng dịch vụ.
+          </div>
+        </div>`;
     }
   });
 }
