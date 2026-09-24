@@ -209,6 +209,74 @@
         align-items: center;
       }
 
+      /* Filter bar */
+      .filter-bar {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 14px;
+        padding: 16px 24px;
+        border-bottom: 1px solid var(--border-color);
+        background: #fafbfc;
+      }
+      .filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .filter-field label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .filter-field input,
+      .filter-field select {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: inherit;
+        color: var(--text-main);
+        background: #fff;
+      }
+      .btn-filter,
+      .btn-filter-clear {
+        border: none;
+        border-radius: 8px;
+        padding: 9px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-filter {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-filter:hover {
+        background: var(--primary-hover);
+      }
+      .btn-filter-clear {
+        background: #f1f5f9;
+        color: var(--text-muted);
+      }
+      .btn-filter-clear:hover {
+        background: #e2e8f0;
+      }
+
+      @media (max-width: 640px) {
+        .filter-bar {
+          padding: 14px 16px;
+        }
+        .filter-field {
+          flex: 1 1 45%;
+        }
+      }
+
       .table-wrapper {
         overflow-x: auto;
       }
@@ -381,6 +449,161 @@
         }
       }
 
+      /* Expand/Collapse row */
+      .chevron-cell {
+        width: 36px;
+        text-align: center;
+        cursor: pointer;
+        color: #94a3b8;
+      }
+      tr.row-main {
+        cursor: pointer;
+      }
+      tr.row-main:hover .chevron-cell i {
+        color: var(--primary);
+      }
+      .chevron-cell i {
+        transition: transform 0.2s ease;
+        display: inline-block;
+      }
+      tr.row-main.expanded .chevron-cell i {
+        transform: rotate(180deg);
+        color: var(--primary);
+      }
+
+      .detail-row td {
+        background: #f8fafc;
+        padding: 0;
+        border-bottom: 1px solid var(--border-color);
+      }
+      .detail-row.hidden {
+        display: none;
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px 28px;
+        padding: 18px 24px;
+      }
+
+      .detail-field .dl {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+      }
+      .detail-field .dv {
+        font-size: 13.5px;
+        color: var(--text-main);
+        font-weight: 600;
+      }
+      .detail-field .dv.link {
+        color: var(--primary);
+      }
+      .detail-field .dv.sla {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #dc2626;
+        font-weight: 600;
+      }
+      .detail-field .dv.muted {
+        color: var(--text-muted);
+        font-weight: 400;
+      }
+
+      @media (max-width: 900px) {
+        .detail-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      /* ====== RESPONSIVE: chuyển bảng thành dạng thẻ xếp dọc, không cuộn ngang ====== */
+      @media (max-width: 860px) {
+        .table-wrapper {
+          overflow-x: visible;
+        }
+
+        table,
+        thead,
+        tbody {
+          display: block;
+          width: 100%;
+        }
+        thead {
+          display: none;
+        } /* ẩn header cột, thay bằng nhãn từng dòng */
+
+        tbody tr.row-main {
+          display: block;
+          position: relative;
+          border: 1px solid var(--border-color);
+          border-radius: 12px;
+          margin: 12px;
+          padding: 14px 44px 14px 14px;
+          background: var(--card-bg);
+        }
+        tbody tr.row-main:hover {
+          background: var(--card-bg);
+        }
+
+        tbody tr.row-main td {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 6px 0;
+          border-bottom: none;
+          white-space: normal;
+        }
+
+        tbody tr.row-main td::before {
+          content: attr(data-label);
+          flex: 0 0 auto;
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          padding-top: 2px;
+        }
+
+        tbody tr.row-main td.chevron-cell::before {
+          content: none;
+        }
+
+        .chevron-cell {
+          position: absolute;
+          top: 14px;
+          right: 14px;
+          width: auto;
+          display: block !important;
+        }
+
+        .request-text {
+          max-width: 65%;
+          white-space: normal;
+          text-align: right;
+        }
+
+        .detail-row {
+          margin: 0 12px 12px;
+        }
+        .detail-row td {
+          padding: 0;
+        }
+        .detail-grid {
+          grid-template-columns: 1fr;
+          padding: 14px;
+          gap: 14px;
+        }
+        .detail-field .dv {
+          text-align: left;
+        }
+      }
+
       .header-logo {
         height: 28px; /* Chiều cao khớp với chữ */
         width: auto; /* Tự điều chỉnh chiều rộng theo tỉ lệ */
@@ -396,8 +619,8 @@
         <div class="header-title">
           <!-- MỚI: Dùng thẻ <img> -->
           <h1>
-            <img src="hkt.jpg" alt="Logo" class="header-logo" />
-            Báo cáo Helpdesk Tổng hợp
+            <img src="./assets/hkt.jpg" alt="Logo" class="header-logo" />
+            Báo cáo Helpdesk Hôm nay
           </h1>
           <div class="sub">
             <i class="fa-regular fa-clock"></i>
@@ -451,16 +674,48 @@
       <!-- Table Card -->
       <div class="table-card">
         <div class="table-header">
-          <span>Danh sách sự vụ mới nhất</span>
+          <span>Danh sách sự vụ</span>
           <span
+            id="record-count"
             style="font-size: 12px; font-weight: 500; color: var(--text-muted)"
-            >Tối đa 20 bản ghi</span
+            >Đang tải...</span
           >
         </div>
+
+        <div class="filter-bar">
+          <div class="filter-field">
+            <label>Từ ngày</label>
+            <input type="date" id="f-from" />
+          </div>
+          <div class="filter-field">
+            <label>Đến ngày</label>
+            <input type="date" id="f-to" />
+          </div>
+          <div class="filter-field">
+            <label>Trạng thái</label>
+            <select id="f-status">
+              <option value="">Tất cả</option>
+              <option value="Open">Mở sự vụ</option>
+              <option value="In_progress">Đang xử lý</option>
+              <option value="Wait_Confirm">Chờ xác nhận</option>
+              <option value="Pending">Tạm hoãn</option>
+              <option value="Close">Đã đóng</option>
+              <option value="Cancel">Đã hủy</option>
+            </select>
+          </div>
+          <button class="btn-filter" onclick="applyFilter()">
+            <i class="fa-solid fa-filter"></i> Lọc
+          </button>
+          <button class="btn-filter-clear" onclick="clearFilter()">
+            <i class="fa-solid fa-xmark"></i> Xóa lọc
+          </button>
+        </div>
+
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
+                <th></th>
                 <th>Mã Ticket</th>
                 <th>Công ty / Khách sạn</th>
                 <th>Người yêu cầu</th>
@@ -469,12 +724,12 @@
                 <th>CS Phản hồi</th>
                 <th>KT Hoàn tất</th>
                 <th>Trạng thái</th>
-                <th>Đánh giá KH</th>
               </tr>
             </thead>
             <tbody id="rows">
               <!-- Skeleton Loading Rows -->
               <tr>
+                <td><div class="skeleton" style="width: 16px"></div></td>
                 <td><div class="skeleton" style="width: 60px"></div></td>
                 <td><div class="skeleton" style="width: 100px"></div></td>
                 <td><div class="skeleton" style="width: 90px"></div></td>
@@ -483,7 +738,6 @@
                 <td><div class="skeleton" style="width: 90px"></div></td>
                 <td><div class="skeleton" style="width: 90px"></div></td>
                 <td><div class="skeleton" style="width: 70px"></div></td>
-                <td><div class="skeleton" style="width: 80px"></div></td>
               </tr>
             </tbody>
           </table>
@@ -516,23 +770,23 @@
         return `<span class="badge ${cls}"><span class="badge-dot"></span>${label}</span>`;
       }
 
-      function ratingCell(t) {
+      function ratingBlock(t) {
         if (t.Rating_Stars) {
           let starsHtml = "";
           for (let i = 1; i <= 5; i++) {
-            if (i <= t.Rating_Stars) {
-              starsHtml += `<i class="fa-solid fa-star"></i>`;
-            } else {
-              starsHtml += `<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>`;
-            }
+            starsHtml +=
+              i <= t.Rating_Stars
+                ? `<i class="fa-solid fa-star"></i>`
+                : `<i class="fa-regular fa-star" style="color:#cbd5e1;"></i>`;
           }
-          return `<div class="rating-stars">${starsHtml} <span style="margin-left: 4px; font-weight: 600; color: #334155;">(${t.Rating_Stars})</span></div>`;
+          return `<div class="rating-stars">${starsHtml} <span style="margin-left:4px;font-weight:600;color:#334155;">(${t.Rating_Stars})</span></div>
+            ${t.Rating_Comment ? `<div style="margin-top:4px;font-style:italic;color:#475569;">"${t.Rating_Comment}"</div>` : ""}`;
         }
-        return `<span class="rating-none">Chưa đánh giá</span>`;
+        return `<span class="rating-none">Khách hàng chưa đánh giá</span>`;
       }
 
       function formatDateTime(value) {
-        if (!value) return '<span class="rating-none">-</span>';
+        if (!value) return "-";
         const d = new Date(value);
         if (isNaN(d.getTime())) return "-";
         return d.toLocaleString("vi-VN", {
@@ -541,6 +795,132 @@
           hour: "2-digit",
           minute: "2-digit",
         });
+      }
+
+      function toggleRow(idx) {
+        const row = document.getElementById("detail-" + idx);
+        const mainRow = document.getElementById("main-" + idx);
+        row.classList.toggle("hidden");
+        mainRow.classList.toggle("expanded");
+      }
+
+      async function loadStats() {
+        // Fetch Stats KPI (tổng hợp toàn bộ, không phụ thuộc bộ lọc bảng bên dưới)
+        const { data: stats } = await supabaseClient
+          .from("v_report_summary")
+          .select("*")
+          .single();
+        const statEls = document.querySelectorAll(".stat-card .num");
+        if (stats) {
+          statEls[0].textContent = stats.total_tickets ?? 0;
+          statEls[1].textContent = stats.completed ?? 0;
+          statEls[2].textContent = stats.awaiting_confirm ?? 0;
+          statEls[3].textContent = stats.not_completed ?? 0;
+        }
+      }
+
+      async function loadTable() {
+        const rowsEl = document.getElementById("rows");
+        const countEl = document.getElementById("record-count");
+        countEl.textContent = "Đang tải...";
+
+        const fromDate = document.getElementById("f-from").value; // yyyy-mm-dd
+        const toDate = document.getElementById("f-to").value;
+        const status = document.getElementById("f-status").value;
+
+        let query = supabaseClient
+          .from("v_ticket_public")
+          .select("*")
+          .order("Ticket_ID", { ascending: false })
+          .limit(1000); // đủ lớn để lấy toàn bộ lịch sử cho quy mô helpdesk vừa/nhỏ
+
+        if (fromDate) query = query.gte("Created_time", fromDate + "T00:00:00");
+        if (toDate) query = query.lte("Created_time", toDate + "T23:59:59");
+        if (status) query = query.eq("Status", status);
+
+        const { data: tickets, error } = await query;
+
+        if (error || !tickets || tickets.length === 0) {
+          countEl.textContent = "0 bản ghi";
+          rowsEl.innerHTML = `
+      <tr>
+        <td colspan="9" style="text-align: center; padding: 32px; color: var(--text-muted);">
+          <i class="fa-solid fa-inbox" style="font-size: 32px; margin-bottom: 8px; color: #cbd5e1;"></i>
+          <div>Không có ticket nào khớp bộ lọc.</div>
+        </td>
+      </tr>`;
+          return;
+        }
+
+        countEl.textContent = tickets.length + " bản ghi";
+
+        rowsEl.innerHTML = tickets
+          .map(
+            (t, idx) => `
+    <tr class="row-main" id="main-${idx}" onclick="toggleRow(${idx})">
+      <td class="chevron-cell"><i class="fa-solid fa-chevron-down"></i></td>
+      <td data-label="Mã Ticket"><span class="ticket-id">#${t.Ticket_ID}</span></td>
+      <td data-label="Công ty"><span class="company-name">${t.Company || "-"}</span></td>
+      <td data-label="Người yêu cầu">${t.Customer || "-"}</td>
+      <td data-label="Nội dung"><div class="request-text" title="${t.Request || ""}">${t.Request || "-"}</div></td>
+      <td data-label="Tạo lúc">${formatDateTime(t.Created_time)}</td>
+      <td data-label="CS Phản hồi">${formatDateTime(t.Reception_time)}</td>
+      <td data-label="KT Hoàn tất">${formatDateTime(t.Resolve_time)}</td>
+      <td data-label="Trạng thái">${statusBadge(t.Status)}</td>
+    </tr>
+    <tr class="detail-row hidden" id="detail-${idx}">
+      <td colspan="9">
+        <div class="detail-grid">
+          <div class="detail-field">
+            <div class="dl">Ticket ID</div>
+            <div class="dv link">${t.Ticket_ID}</div>
+          </div>
+          <div class="detail-field">
+            <div class="dl">Hạng mục</div>
+            <div class="dv">${t.Layer_detail || "-"}</div>
+          </div>
+          <div class="detail-field">
+            <div class="dl">NV Hỗ trợ</div>
+            <div class="dv"><i class="fa-solid fa-user-shield" style="color:var(--primary);margin-right:4px;"></i>${t.Staff || "-"}${t.Staff_Support_Names ? ", " + t.Staff_Support_Names : ""}</div>
+          </div>
+          <div class="detail-field">
+            <div class="dl">Phản hồi của KH</div>
+            <div class="dv muted">${ratingBlock(t)}</div>
+          </div>
+
+          <div class="detail-field">
+            <div class="dl">Mức độ</div>
+            <div class="dv">${t.Level_detail || "-"}</div>
+          </div>
+          <div class="detail-field">
+            <div class="dl">Phương thức</div>
+            <div class="dv">${t.Method || "-"}</div>
+          </div>
+          <div class="detail-field">
+            <div class="dl">SLA CS</div>
+            <div class="dv sla"><i class="fa-solid fa-triangle-exclamation"></i>${formatDateTime(t.SLA_Cs_Deadline)}</div>
+          </div>
+          <div class="detail-field">
+            <div class="dl">SLA Kỹ thuật</div>
+            <div class="dv sla"><i class="fa-solid fa-triangle-exclamation"></i>${formatDateTime(t.SLA_It_Deadline)}</div>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `,
+          )
+          .join("");
+      }
+
+      function applyFilter() {
+        loadTable();
+      }
+
+      function clearFilter() {
+        document.getElementById("f-from").value = "";
+        document.getElementById("f-to").value = "";
+        document.getElementById("f-status").value = "";
+        loadTable();
       }
 
       async function refreshData() {
@@ -558,56 +938,8 @@
           " - " +
           now.toLocaleDateString("vi-VN");
 
-        // Fetch Stats KPI (tổng hợp toàn bộ, không giới hạn hôm nay)
-        const { data: stats } = await supabaseClient
-          .from("v_report_summary")
-          .select("*")
-          .single();
-
-        const statEls = document.querySelectorAll(".stat-card .num");
-        if (stats) {
-          statEls[0].textContent = stats.total_tickets ?? 0;
-          statEls[1].textContent = stats.completed ?? 0;
-          statEls[2].textContent = stats.awaiting_confirm ?? 0;
-          statEls[3].textContent = stats.not_completed ?? 0;
-        }
-
-        // Fetch Ticket Table
-        const { data: tickets, error } = await supabaseClient
-          .from("v_ticket_public")
-          .select("*")
-          .order("Ticket_ID", { ascending: false })
-          .limit(20);
-
-        const rowsEl = document.getElementById("rows");
-        if (error || !tickets || tickets.length === 0) {
-          rowsEl.innerHTML = `
-      <tr>
-        <td colspan="9" style="text-align: center; padding: 32px; color: var(--text-muted);">
-          <i class="fa-solid fa-inbox" style="font-size: 32px; margin-bottom: 8px; color: #cbd5e1;"></i>
-          <div>Chưa có dữ liệu ticket nào.</div>
-        </td>
-      </tr>`;
-          return;
-        }
-
-        rowsEl.innerHTML = tickets
-          .map(
-            (t) => `
-    <tr>
-      <td><span class="ticket-id">#${t.Ticket_ID}</span></td>
-      <td><span class="company-name">${t.Company || "-"}</span></td>
-      <td>${t.Customer || "-"}</td>
-      <td><div class="request-text" title="${t.Request || ""}">${t.Request || "-"}</div></td>
-      <td>${formatDateTime(t.Created_time)}</td>
-      <td>${formatDateTime(t.Reception_time)}</td>
-      <td>${formatDateTime(t.Resolve_time)}</td>
-      <td>${statusBadge(t.Status)}</td>
-      <td>${ratingCell(t)}</td>
-    </tr>
-  `,
-          )
-          .join("");
+        await loadStats();
+        await loadTable();
       }
 
       init();
