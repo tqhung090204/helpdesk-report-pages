@@ -268,6 +268,40 @@
         background: #e2e8f0;
       }
 
+      /* Quick range buttons */
+      .quick-range {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 14px 24px 0;
+      }
+      .btn-quick {
+        border: 1px solid var(--border-color);
+        background: #fff;
+        color: var(--text-muted);
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .btn-quick:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+      }
+      .btn-quick.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #fff;
+      }
+
+      @media (max-width: 640px) {
+        .quick-range {
+          padding: 12px 16px 0;
+        }
+      }
+
       @media (max-width: 640px) {
         .filter-bar {
           padding: 14px 16px;
@@ -617,7 +651,6 @@
       <!-- Header -->
       <div class="dashboard-header">
         <div class="header-title">
-          <!-- MỚI: Dùng thẻ <img> -->
           <h1>
             <img src="./assets/hkt.jpg" alt="Logo" class="header-logo" />
             Báo cáo Helpdesk Hôm nay
@@ -680,6 +713,51 @@
             style="font-size: 12px; font-weight: 500; color: var(--text-muted)"
             >Đang tải...</span
           >
+        </div>
+
+        <div class="quick-range" id="quick-range">
+          <button
+            class="btn-quick"
+            data-range="today"
+            onclick="setQuickRange('today')"
+          >
+            Hôm nay
+          </button>
+          <button
+            class="btn-quick"
+            data-range="yesterday"
+            onclick="setQuickRange('yesterday')"
+          >
+            Hôm qua
+          </button>
+          <button
+            class="btn-quick"
+            data-range="thisweek"
+            onclick="setQuickRange('thisweek')"
+          >
+            Tuần này
+          </button>
+          <button
+            class="btn-quick"
+            data-range="thismonth"
+            onclick="setQuickRange('thismonth')"
+          >
+            Tháng này
+          </button>
+          <button
+            class="btn-quick"
+            data-range="lastmonth"
+            onclick="setQuickRange('lastmonth')"
+          >
+            Tháng trước
+          </button>
+          <button
+            class="btn-quick"
+            data-range="all"
+            onclick="setQuickRange('all')"
+          >
+            Toàn bộ
+          </button>
         </div>
 
         <div class="filter-bar">
@@ -913,6 +991,7 @@
       }
 
       function applyFilter() {
+        setActiveQuickBtn(null); // lọc tay -> bỏ highlight nút nhanh
         loadTable();
       }
 
@@ -920,13 +999,68 @@
         document.getElementById("f-from").value = "";
         document.getElementById("f-to").value = "";
         document.getElementById("f-status").value = "";
+        setActiveQuickBtn("all");
+        loadTable();
+      }
+
+      function toISODate(d) {
+        return d.toISOString().slice(0, 10);
+      }
+
+      function setActiveQuickBtn(range) {
+        document.querySelectorAll("#quick-range .btn-quick").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.range === range);
+        });
+      }
+
+      function setQuickRange(range) {
+        const today = new Date();
+        let from, to;
+
+        switch (range) {
+          case "today":
+            from = to = new Date(today);
+            break;
+          case "yesterday":
+            from = to = new Date(today);
+            from.setDate(from.getDate() - 1);
+            to.setDate(to.getDate() - 1);
+            break;
+          case "thisweek": {
+            const day = (today.getDay() + 6) % 7; // Thứ 2 = 0 ... Chủ nhật = 6
+            from = new Date(today);
+            from.setDate(today.getDate() - day);
+            to = new Date(today);
+            break;
+          }
+          case "thismonth":
+            from = new Date(today.getFullYear(), today.getMonth(), 1);
+            to = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            break;
+          case "lastmonth":
+            from = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            to = new Date(today.getFullYear(), today.getMonth(), 0);
+            break;
+          case "all":
+          default:
+            document.getElementById("f-from").value = "";
+            document.getElementById("f-to").value = "";
+            setActiveQuickBtn("all");
+            loadTable();
+            return;
+        }
+
+        document.getElementById("f-from").value = toISODate(from);
+        document.getElementById("f-to").value = toISODate(to);
+        setActiveQuickBtn(range);
         loadTable();
       }
 
       async function refreshData() {
         const icon = document.getElementById("refresh-icon");
         icon.classList.add("spin");
-        await init();
+        await loadStats();
+        await loadTable(); // giữ nguyên bộ lọc đang chọn, chỉ tải lại dữ liệu mới nhất
         setTimeout(() => icon.classList.remove("spin"), 600);
       }
 
@@ -939,7 +1073,7 @@
           now.toLocaleDateString("vi-VN");
 
         await loadStats();
-        await loadTable();
+        setQuickRange("today"); // mặc định mở trang là báo cáo Hôm nay, tự gọi loadTable() bên trong
       }
 
       init();
