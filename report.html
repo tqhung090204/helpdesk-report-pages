@@ -882,19 +882,21 @@
         mainRow.classList.toggle("expanded");
       }
 
-      async function loadStats() {
-        // Fetch Stats KPI (tổng hợp toàn bộ, không phụ thuộc bộ lọc bảng bên dưới)
-        const { data: stats } = await supabaseClient
-          .from("v_report_summary")
-          .select("*")
-          .single();
+      function renderStats(list) {
         const statEls = document.querySelectorAll(".stat-card .num");
-        if (stats) {
-          statEls[0].textContent = stats.total_tickets ?? 0;
-          statEls[1].textContent = stats.completed ?? 0;
-          statEls[2].textContent = stats.awaiting_confirm ?? 0;
-          statEls[3].textContent = stats.not_completed ?? 0;
-        }
+        const total = list.length;
+        const completed = list.filter((t) => t.Status === "Close").length;
+        const awaitingConfirm = list.filter(
+          (t) => t.Status === "Wait_Confirm",
+        ).length;
+        const notCompleted = list.filter(
+          (t) => t.Status !== "Close" && t.Status !== "Cancel",
+        ).length;
+
+        statEls[0].textContent = total;
+        statEls[1].textContent = completed;
+        statEls[2].textContent = awaitingConfirm;
+        statEls[3].textContent = notCompleted;
       }
 
       async function loadTable() {
@@ -906,19 +908,32 @@
         const toDate = document.getElementById("f-to").value;
         const status = document.getElementById("f-status").value;
 
+        // Lấy theo đúng khoảng NGÀY đang chọn (chưa lọc trạng thái) để 4 ô KPI luôn khớp đúng khoảng ngày này
         let query = supabaseClient
           .from("v_ticket_public")
           .select("*")
           .order("Ticket_ID", { ascending: false })
-          .limit(1000); // đủ lớn để lấy toàn bộ lịch sử cho quy mô helpdesk vừa/nhỏ
+          .limit(1000); // đủ lớn cho quy mô helpdesk vừa/nhỏ
 
         if (fromDate) query = query.gte("Created_time", fromDate + "T00:00:00");
         if (toDate) query = query.lte("Created_time", toDate + "T23:59:59");
-        if (status) query = query.eq("Status", status);
 
-        const { data: tickets, error } = await query;
+        const { data: ticketsInRange, error } = await query;
 
-        if (error || !tickets || tickets.length === 0) {
+        if (error) {
+          countEl.textContent = "Lỗi tải dữ liệu";
+          rowsEl.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:32px;color:#c62828;">Có lỗi khi tải dữ liệu: ${error.message}</td></tr>`;
+          return;
+        }
+
+        renderStats(ticketsInRange || []);
+
+        // Bảng danh sách: lọc thêm theo trạng thái (nếu có chọn), trên cùng tập dữ liệu vừa lấy
+        const tickets = status
+          ? (ticketsInRange || []).filter((t) => t.Status === status)
+          : ticketsInRange || [];
+
+        if (tickets.length === 0) {
           countEl.textContent = "0 bản ghi";
           rowsEl.innerHTML = `
       <tr>
@@ -1059,8 +1074,7 @@
       async function refreshData() {
         const icon = document.getElementById("refresh-icon");
         icon.classList.add("spin");
-        await loadStats();
-        await loadTable(); // giữ nguyên bộ lọc đang chọn, chỉ tải lại dữ liệu mới nhất
+        await loadTable(); // giữ nguyên bộ lọc đang chọn, tải lại cả KPI lẫn bảng
         setTimeout(() => icon.classList.remove("spin"), 600);
       }
 
@@ -1072,7 +1086,6 @@
           " - " +
           now.toLocaleDateString("vi-VN");
 
-        await loadStats();
         setQuickRange("today"); // mặc định mở trang là báo cáo Hôm nay, tự gọi loadTable() bên trong
       }
 
